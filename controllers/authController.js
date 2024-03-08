@@ -25,15 +25,7 @@ const register = async (req, res) => {
 
     We are thrilled to welcome you to Uphaar! Thank you for choosing us as your destination. Your registration has been successfully completed, and we are excited to have you join our community.
     
-    Here at Uphaar, we strive to provide an exceptional experience for all our users, and we are committed to offering you valuable services and resources tailored to your needs.
-    
-    encourage you to explore our website fully and take advantage of everything it has to offer.
-    
-    If you have any questions, concerns, or feedback, please don't hesitate to reach out to us. Our support team is here to assist you every step of the way.
-    
-    Once again, welcome to Uphaar! We look forward to serving you and hope you have a fantastic experience with us.
-    
-    Best regards,  
+   <h3> Best regards</h3>  
     `;
     const options = {
       email: email,
@@ -88,7 +80,6 @@ const login = async (req, res) => {
 
 const user = async (req, res) => {
   const user = req.user;
-  console.log("user:", req.user);
   try {
     return res.status(200).json({ success: true, user });
   } catch (error) {
@@ -111,7 +102,7 @@ const sendpasswordlink = async (req, res) => {
         .status(400)
         .json({ success: false, message: "User Doesn't Exist" });
     }
-    const resetToken = await userExist.generateToken("1d");
+    const resetToken = await userExist.generateToken("120sec");
     const setUserToken = await User.findByIdAndUpdate(
       { _id: userExist._id },
       { verifyToken: resetToken },
@@ -119,7 +110,7 @@ const sendpasswordlink = async (req, res) => {
     );
     if (setUserToken) {
       // localhost:5173 = ${req.get("host")}
-      const resetUrl = `${req.protocol}://localhost:5173/forgotpassword/${userExist.id}/${userExist.verifyToken}`;
+      const resetUrl = `${req.protocol}://localhost:5173/forgotpassword/${userExist.id}/${setUserToken.verifyToken}`;
 
       const message = `
       <h1>You have requested password reset</h1>
@@ -145,8 +136,13 @@ const sendpasswordlink = async (req, res) => {
 const forgotPassword = async (req, res) => {
   const { id, token } = req.params;
   try {
-    const validUser = await User.findOne({ _id: id });
+    console.log("Id:", id);
+    const validUser = await User.findOne({ _id: id, verifyToken: token });
+    console.log("validUser:", validUser);
+    console.log("Token:", token);
     const isTokenVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    console.log("isTokenVerified:", isTokenVerified);
+
     if (validUser && isTokenVerified) {
       return res.status(201).json({ success: true, validUser });
     } else {
@@ -163,9 +159,9 @@ const updatePassword = async (req, res) => {
   const { id, token } = req.params;
   const { password } = req.body;
   try {
-    const validUser = await User.findOne({ _id: id });
+    const validUser = await User.findOne({ _id: id, verifyToken: token });
     const isTokenVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
+    console.log("valid user in update password:", validUser);
     if (validUser && isTokenVerified) {
       const hashedPassword = await bcrypt.hash(password, 12);
       const newUser = await User.findByIdAndUpdate(

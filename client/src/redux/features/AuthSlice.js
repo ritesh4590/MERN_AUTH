@@ -116,6 +116,7 @@ const AuthSlice = createSlice({
       console.log("forgotPassword payload:", action.payload);
     });
     builder.addCase(forgotPassword.rejected, (state, action) => {
+      console.log("forgotPassword Error payload:", action.error.message);
       state.isError = action.error.message;
     });
     builder.addCase(updateForgottenPassword.pending, (state, action) => {
@@ -126,6 +127,10 @@ const AuthSlice = createSlice({
       console.log("updateForgottenPassword payload:", action.payload);
     });
     builder.addCase(updateForgottenPassword.rejected, (state, action) => {
+      console.log(
+        "updateForgottenPassword Error payload:",
+        action.error.message
+      );
       state.isError = action.error.message;
     });
   },

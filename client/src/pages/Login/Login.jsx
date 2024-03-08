@@ -36,10 +36,12 @@ const Login = () => {
       console.log("loginResponse:", loginResponse)
       if (loginResponse.payload === undefined) {
         toast.error(loginResponse.error.message);
+        setBtnText(false)
       }
       else if (loginResponse.payload.success === true) {
         navigate('/')
         toast.success('Login Successfully!');
+        setBtnText(false)
       }
     } catch (error) {
 
